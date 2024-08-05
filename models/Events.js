@@ -1,7 +1,8 @@
 require('dotenv').config();
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-const Utils = require('../utils')
+const Utils = require('../utils');
+const { text } = require('express');
 require('mongoose-type-email');
 
 const eventSchema = new mongoose.Schema({
@@ -26,15 +27,15 @@ const eventSchema = new mongoose.Schema({
     required: true
   },
   eventtag: {
+    type: [String], // changed to array of strings
+    required: true
+  },
+  eventsaturdaytime: {
     type: String,
     required: true
   },
-  eventoperationdatetimestart: {
-    type: Date,
-    required: true
-  },
-  eventoperationdatetimeend: {
-    type: Date,
+  eventsundaytime: {
+    type: String,
     required: true
   },
   eventstallnumber: {
