@@ -1,6 +1,6 @@
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
-let crypto = require('crypto');
+let crypto = require('crypto')
 const { v4: uuidv4 } = require('uuid')
 const path = require('path')
 

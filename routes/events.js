@@ -4,6 +4,7 @@ const router = express.Router()
 const path = require('path')
 const Event = require('../models/Events')
 const Utils = require('../utils')
+const s3 = require('../s3')
 
 // GET - get all events
 router.get('/', (req, res) => {
@@ -26,9 +27,7 @@ router.get('/', (req, res) => {
 })
 
 // POST - create new Event
-router.post('/', (req, res) => {
-
-  // validate
+router.post('/', async (req, res) => {
   if(!req.body.eventdisplayname || !req.body.vendorcontactemail || !req.body.vendorcontactphone) {
     return res.status(400).send({ message: "Event content cannot be empty" })
   }
@@ -54,6 +53,7 @@ router.post('/', (req, res) => {
       eventsundaytime: req.body.eventsundaytime,
       eventstallnumber: req.body.eventstallnumber,
       eventdescription: req.body.eventdescription,
+      eventimage: req.body.eventimage,
       eventimage: uniqueFilename,
     })
 
@@ -68,8 +68,9 @@ router.post('/', (req, res) => {
           error: err
         })
       })
-      })
-  })
+    })
+})
+
   
 // export
 module.exports = router
