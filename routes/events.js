@@ -26,11 +26,20 @@ router.get('/', (req, res) => {
 })
 
 // POST - create new Event
-router.post('/', Utils.authenticateToken, (req, res) => {
+router.post('/', async (req, res) => {
+  if(!req.body.eventdisplayname || !req.body.vendorcontactemail || !req.body.vendorcontactphone) {
+    return res.status(400).send({ message: "Event content cannot be empty" })
+  }
 
-  // validate
+  // check image file exists
+  if(!req.files || !req.files.eventimage) {
+    return res.status(400).send({ message: "Image cannot be empty "})
+  }
 
+  console.log('req.files = ', req.files)
 
+  let uploadPath = path.join(__dirname, '..', 'public', 'images')
+  Utils.uploadFile(req.files.eventimage, uploadPath, (uniqueFilename) => {
     // create new Event
     let newEvent = new Event({
       eventdisplayname: req.body.eventdisplayname,
@@ -44,6 +53,7 @@ router.post('/', Utils.authenticateToken, (req, res) => {
       eventstallnumber: req.body.eventstallnumber,
       eventdescription: req.body.eventdescription,
       eventimage: req.body.eventimage,
+      eventimage: uniqueFilename,
     })
 
     newEvent.save()
@@ -57,7 +67,9 @@ router.post('/', Utils.authenticateToken, (req, res) => {
           error: err
         })
       })
-  })
+    })
+})
+
   
 // export
 module.exports = router
