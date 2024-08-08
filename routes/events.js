@@ -4,7 +4,6 @@ const router = express.Router()
 const path = require('path')
 const Event = require('../models/Events')
 const Utils = require('../utils')
-const s3 = require('../s3')
 
 // GET - get all events
 router.get('/', (req, res) => {
