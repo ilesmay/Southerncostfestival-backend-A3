@@ -14,6 +14,7 @@ router.get('/', (req, res) => {
           message: "No events found"
         })
       }
+
       console.log(events)
       res.json(events)
     })
@@ -39,6 +40,7 @@ router.post('/', async (req, res) => {
   console.log('req.files = ', req.files)
 
   let uploadPath = path.join(__dirname, '..', 'public', 'images')
+  
   Utils.uploadFile(req.files.eventimage, uploadPath, (uniqueFilename) => {
     // create new Event
     let newEvent = new Event({
@@ -52,13 +54,13 @@ router.post('/', async (req, res) => {
       eventsundaytime: req.body.eventsundaytime,
       eventstallnumber: req.body.eventstallnumber,
       eventdescription: req.body.eventdescription,
-      eventimage: req.body.eventimage,
       eventimage: uniqueFilename,
     })
 
     newEvent.save()
-      .then(Event => {
-        return res.status(201).json(Event)
+      .then(event => {
+        const imageUrl = `/images/${uniqueFilename}`
+        return res.status(201).json({ event, imageUrl })
       })
       .catch(err => {
         console.error('Error saving Event:', err)
