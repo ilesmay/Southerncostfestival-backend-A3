@@ -1,8 +1,8 @@
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
 let crypto = require('crypto')
-const { v4: uuidv4 } = require('uuid')
 const path = require('path')
+const ftp = require('ftp');
 
 class Utils {
 
@@ -43,23 +43,58 @@ class Utils {
     }
     
 
-    uploadFile(file, uploadPath, callback){        
+    uploadFile(file, uploadPath, callback) {
         if (!file || !file.name) {
-            console.error("Invalid file object:", file)
-            return callback(null)
+            console.error("Invalid file object:", file);
+            return callback(null);
         }
-
-        const uniqueFilename = `${Date.now()}_${file.name}`
-        const filePath = path.join(uploadPath, uniqueFilename)
-
+    
+        const uniqueFilename = `${Date.now()}_${file.name}`;
+        const filePath = path.join(uploadPath, uniqueFilename);
+    
+        // Save the file locally first
         file.mv(filePath, (err) => {
-            if(err){
-                console.error('File upload error:', err)
-                return callback(null)
+            if (err) {
+                console.error('File save error:', err);
+                return callback(null);
             }
-            callback(uniqueFilename)
-        })
-    }
+    
+            // Create an FTP client
+            const client = new ftp();
+    
+            // Connect to the FTP server
+            client.on('ready', () => {
+                // Upload the file to the FTP server
+                client.put(filePath, uniqueFilename, (err) => {
+                    if (err) {
+                        console.error('FTP upload error:', err);
+                        client.end();
+                        return callback(null);
+                    }
+    
+                    // Close the FTP connection
+                    client.end();
+    
+                    // Call the callback with the unique filename
+                    callback(uniqueFilename);
+                });
+            });
+    
+            // Handle connection errors
+            client.on('error', (err) => {
+                console.error('FTP connection error:', err);
+                callback(null);
+            });
+    
+            // Connect to the FTP server with your credentials
+            client.connect({
+                host: 'ftp.mrlee.com.au',
+                user: process.env.FTP_USER,
+                password: process.env.FTP_PASSWORD,
+                secure: true
+            });
+        });
+    }    
 }
 
 module.exports = new Utils()

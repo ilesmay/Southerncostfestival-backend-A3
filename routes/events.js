@@ -42,6 +42,12 @@ router.post('/', async (req, res) => {
   let uploadPath = path.join(__dirname, '..', 'public', 'images')
   
   Utils.uploadFile(req.files.eventimage, uploadPath, (uniqueFilename) => {
+
+    if (!uniqueFilename) {
+      return res.status(500).send({
+        message: "Image did not upload",
+      })
+    }
     // create new Event
     let newEvent = new Event({
       eventdisplayname: req.body.eventdisplayname,
