@@ -1,8 +1,16 @@
 require('dotenv').config()
+const aws = require('aws-sdk');
 const jwt = require('jsonwebtoken')
 let crypto = require('crypto')
-const { v4: uuidv4 } = require('uuid')
 const path = require('path')
+
+
+const s3 = new aws.S3({
+    region: "us-east-1",
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    signatureVersion: 'v4'
+})
 
 class Utils {
 
@@ -59,6 +67,26 @@ class Utils {
             }
             callback(uniqueFilename)
         })
+    }
+
+    async uploadFileToS3(file, callback) {
+        const rawBytes = await crypto.randomBytes(16);
+        const imageName = rawBytes.toString('hex');
+
+        const params = {
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: imageName,
+            Body: file.data,
+            ContentType: 'image/jpeg', 
+        };
+
+        s3.upload(params, (err, data) => {
+            if (err) {
+                console.error('File upload error:', err);
+                return callback(null);
+            }
+            callback(data.Location); // Return the URL of the uploaded file
+        });
     }
 }
 
