@@ -37,11 +37,7 @@ router.post('/', async (req, res) => {
     return res.status(400).send({ message: "Image cannot be empty "})
   }
 
-  console.log('req.files = ', req.files)
-
-  let uploadPath = path.join(__dirname, '..', 'public', 'images')
-  
-  Utils.uploadFile(req.files.eventimage, uploadPath, (uniqueFilename) => {
+  Utils.uploadFileToS3(req.files.eventimage, (imageUrl) => {
     // create new Event
     let newEvent = new Event({
       eventdisplayname: req.body.eventdisplayname,
@@ -54,12 +50,11 @@ router.post('/', async (req, res) => {
       eventsundaytime: req.body.eventsundaytime,
       eventstallnumber: req.body.eventstallnumber,
       eventdescription: req.body.eventdescription,
-      eventimage: uniqueFilename,
+      eventimage: imageUrl,
     })
 
     newEvent.save()
       .then(event => {
-        const imageUrl = `/images/${uniqueFilename}`
         return res.status(201).json({ event, imageUrl })
       })
       .catch(err => {
