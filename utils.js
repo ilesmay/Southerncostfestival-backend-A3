@@ -88,6 +88,37 @@ class Utils {
             callback(data.Location); // Return the URL of the uploaded file
         });
     }
+
+    deleteFileFromS3(imageUrl) {
+        return new Promise((resolve, reject) => {
+            const params = {
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: extractKeyFromUrl(imageUrl)
+            }
+
+            s3.deleteObject(params, (err, data) => {
+                if (err) {
+                    console.error('Error deleting file from S3:', err)
+                    return reject(err)
+                }
+                resolve(data)
+            })
+        })
+    }
+
+    extractKeyFromUrl(imageUrl) {
+        const bucketName = 'lightfestival-photo-storage'
+
+        const bucketNameIndex = imageUrl.indexOf(bucketName)
+        if (bucketNameIndex === -1) {
+            throw new Error('Invalid S3 URL: Bucket name not found')
+        }
+
+        const keyStartIndex = bucketNameIndex + bucketName.length + 1
+        const key = imageUrl.substring(keyStartIndex)
+
+        return key
+    }
 }
 
 module.exports = new Utils()
