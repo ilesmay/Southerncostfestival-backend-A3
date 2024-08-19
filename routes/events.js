@@ -155,9 +155,7 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Event not found' })
     }
 
-    if (event.eventimage) {
-      await Utils.deleteFileFromS3(event.eventimage)
-    }
+
 
     await Event.findByIdAndDelete(eventId)
     res.status(200).json({ message: 'Event deleted successfully' })
